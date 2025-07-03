@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AITuber OnAir Bushitsu</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .config {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .room-item {
+            padding: 8px;
+            margin: 4px 0;
+            background-color: white;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .room-item:hover {
+            background-color: #f0f0f0;
+        }
+        .room-item.active {
+            background-color: #e3f2fd;
+            border: 1px solid #007bff;
+        }
+        input, button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        .message {
+            margin-bottom: 8px;
+            padding: 4px 0;
+        }
+        .message.mention {
+            background-color: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .message-from {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .message-text {
+            margin-left: 8px;
+        }
+        .input-area {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .status-connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .message.system {
+            background-color: #e9ecef;
+            font-style: italic;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .message.self-mention {
+            background-color: #d1ecf1;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .message.own {
+            background-color: #e3f2fd;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .session-id {
+            color: #666;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+        .hint {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AITuber OnAir Bushitsu</h1>
+        
+        <div class="config">
+            <input type="text" id="room" placeholder="Room名 (デフォルト: lobby)" value="lobby">
+            <input type="text" id="name" placeholder="ユーザー名">
+            <button id="connectBtn" onclick="toggleConnection()">接続</button>
+        </div>
+
+        <div id="roomManagement" style="margin: 20px 0;">
+            <h3>ルーム管理</h3>
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="newRoomName" placeholder="新しいルーム名">
+                <button onclick="createRoom()">ルーム作成</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="loadRooms()">ルーム一覧を更新</button>
+                <button onclick="setInterval(loadRooms, 5000); this.disabled=true; this.textContent='自動更新中...';">自動更新を開始</button>
+            </div>
+            <div id="roomList" style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                <p style="color: #666;">ルーム一覧を読み込んでください</p>
+            </div>
+        </div>
+
+        <div id="messages"></div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="メッセージを入力..." disabled>
+            <button id="sendBtn" onclick="sendMessage()" disabled>送信</button>
+        </div>
+
+        <div id="status" class="status-disconnected">未接続</div>
+        
+        <div style="margin-top: 10px;">
+            <label>
+                <input type="checkbox" id="showSessionId" checked onchange="toggleSessionIdDisplay()">
+                セッションIDを表示
+            </label>
+        </div>
+
+        <div class="hint">
+            <strong>使い方:</strong><br>
+            • 通常のメッセージ: そのまま入力して送信<br>
+            • メンション: @ユーザー名 メッセージ (例: @alice こんにちは)<br>
+            • ルーム選択: ルーム一覧から選択するか、ルーム名を直接入力<br>
+            • 新規ルーム: ルーム管理エリアから作成（動的ルーム作成が無効の場合は必須）
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentRoom = '';
+        let currentName = '';
+        let mySessionId = null;
+        let showSessionId = true;
+        
+        // Load rooms on page load
+        window.addEventListener('load', () => {
+            loadRooms();
+        });
+
+        function toggleConnection() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            } else {
+                connect();
+            }
+        }
+
+        function connect() {
+            const room = document.getElementById('room').value || 'lobby';
+            const name = document.getElementById('name').value;
+
+            if (!name) {
+                alert('ユーザー名を入力してください');
+                return;
+            }
+
+            currentRoom = room;
+            currentName = name;
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const url = `${protocol}//${window.location.host}/ws?room=${encodeURIComponent(room)}&name=${encodeURIComponent(name)}`;
+
+            ws = new WebSocket(url);
+
+            ws.onopen = () => {
+                updateStatus(true);
+                addSystemMessage(`${room}に入室しました`);
+            };
+
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                addMessage(message);
+            };
+
+            ws.onclose = () => {
+                updateStatus(false);
+                addSystemMessage('接続が切断されました');
+                mySessionId = null;  // Reset session ID on disconnect
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                if (error.target.readyState === WebSocket.CLOSED) {
+                    addSystemMessage('エラー: ルームが存在しないか、接続が拒否されました');
+                } else {
+                    addSystemMessage('エラーが発生しました');
+                }
+            };
+        }
+
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            const connectBtn = document.getElementById('connectBtn');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+
+            if (connected) {
+                status.textContent = '接続中';
+                status.className = 'status-connected';
+                connectBtn.textContent = '切断';
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                document.getElementById('room').disabled = true;
+                document.getElementById('name').disabled = true;
+            } else {
+                status.textContent = '未接続';
+                status.className = 'status-disconnected';
+                connectBtn.textContent = '接続';
+                messageInput.disabled = true;
+                sendBtn.disabled = true;
+                document.getElementById('room').disabled = false;
+                document.getElementById('name').disabled = false;
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
+            if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+            const message = {
+                type: 'chat',
+                text: text
+            };
+
+            ws.send(JSON.stringify(message));
+            input.value = '';
+        }
+
+        function addMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+
+            switch (message.type) {
+                case 'user_event':
+                    messageDiv.className += ' system';
+                    const eventText = message.data.event === 'join' 
+                        ? `${message.data.user} が入室しました`
+                        : `${message.data.user} が退室しました`;
+                    messageDiv.textContent = `[システム] ${eventText}`;
+                    break;
+
+                case 'chat':
+                    const chatData = message.data;
+                    
+                    // Store our session ID when we receive our first message
+                    if (chatData.from === currentName && chatData.fromId && !mySessionId) {
+                        mySessionId = chatData.fromId;
+                    }
+                    
+                    // Check if this is our own message
+                    const isOwnMessage = chatData.fromId === mySessionId;
+                    
+                    // Check if it's a mention to current user
+                    if (chatData.mention && chatData.mention.includes(currentName)) {
+                        messageDiv.className += ' mention';
+                    }
+                    // Check if it's a mention sent by current user
+                    else if (chatData.from === currentName && chatData.text.startsWith('@')) {
+                        messageDiv.className += ' self-mention';
+                    }
+                    // Highlight own messages
+                    else if (isOwnMessage) {
+                        messageDiv.className += ' own';
+                    }
+
+                    messageDiv.innerHTML = `
+                        <span class="message-from">${escapeHtml(chatData.from)}:</span>
+                        <span class="message-text">${escapeHtml(chatData.text)}</span>
+                        <span class="session-id" style="display: ${showSessionId ? 'inline' : 'none'};">(${chatData.fromId})</span>
+                    `;
+                    break;
+
+                case 'system':
+                    messageDiv.className += ' system';
+                    messageDiv.textContent = `[システム] ${message.data.event}`;
+                    break;
+
+                default:
+                    console.warn('Unknown message type:', message.type);
+                    return;
+            }
+
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.style.fontStyle = 'italic';
+            messageDiv.style.color = '#6c757d';
+            messageDiv.textContent = `[システム] ${text}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.getElementById('name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                connect();
+            }
+        });
+
+        function toggleSessionIdDisplay() {
+            showSessionId = document.getElementById('showSessionId').checked;
+            const sessionIdElements = document.querySelectorAll('.session-id');
+            sessionIdElements.forEach(el => {
+                el.style.display = showSessionId ? 'inline' : 'none';
+            });
+        }
+        
+        function selectRoom(roomName) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                if (confirm(`現在の接続を切断して、ルーム「${roomName}」に接続しますか？`)) {
+                    ws.close();
+                    document.getElementById('room').value = roomName;
+                    setTimeout(() => connect(), 100);
+                }
+            } else {
+                document.getElementById('room').value = roomName;
+                loadRooms();
+            }
+        }
+        
+        async function loadRooms() {
+            try {
+                const response = await fetch('/api/rooms');
+                const data = await response.json();
+                
+                const roomListDiv = document.getElementById('roomList');
+                if (data.rooms && data.rooms.length > 0) {
+                    const roomsHtml = data.rooms.map(room => {
+                        const userCount = room.userCount || 0;
+                        const isActive = room.name === document.getElementById('room').value;
+                        const userCountText = userCount === 0 ? '空室' : `${userCount}人`;
+                        return `
+                            <div class="room-item${isActive ? ' active' : ''}" onclick="selectRoom('${escapeHtml(room.name)}')">
+                                <span><strong>${escapeHtml(room.name)}</strong></span>
+                                <span style="color: #666;">${userCountText}</span>
+                            </div>
+                        `;
+                    }).join('');
+                    roomListDiv.innerHTML = roomsHtml;
+                } else {
+                    roomListDiv.innerHTML = '<p style="color: #666;">作成されたルームがありません</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load rooms:', error);
+                document.getElementById('roomList').innerHTML = '<p style="color: #dc3545;">ルームの読み込みに失敗しました</p>';
+            }
+        }
+        
+        async function createRoom() {
+            const roomName = document.getElementById('newRoomName').value.trim();
+            if (!roomName) {
+                alert('ルーム名を入力してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/rooms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: roomName })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`ルーム「${roomName}」を作成しました`);
+                    document.getElementById('newRoomName').value = '';
+                    loadRooms();
+                } else {
+                    alert(`エラー: ${data.error || 'ルームの作成に失敗しました'}`);
+                }
+            } catch (error) {
+                console.error('Failed to create room:', error);
+                alert('ルームの作成に失敗しました');
+            }
+        }
+    </script>
+</body>
+</html>
