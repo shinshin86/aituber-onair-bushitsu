@@ -65,6 +65,57 @@ See [MESSAGE_SPEC.md](./MESSAGE_SPEC.md) for detailed specification.
 
 ## Quick Start
 
+## Installation (macOS)
+
+Install the prebuilt binary without requiring Go:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
+```
+
+To install a specific version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash -s -- v1.2.3
+```
+
+To install to a custom directory:
+
+```bash
+BIN_DIR="$HOME/bin" curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
+```
+
+Updates: run the same command again. It will fetch the latest release and replace the existing binary (a timestamped backup is kept).
+
+## Installation (Windows)
+
+One-liner (fastest):
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 | iex
+```
+
+Install a specific version:
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1 v1.2.3
+```
+
+Safer flow (download, review, then run):
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
+notepad .\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+Updates: run the same command again. It will fetch the latest release and replace the existing binary (a timestamped backup is kept).
+
+Notes:
+- PowerShell execution policy may block scripts; use the Process-scope bypass example above if needed.
+- SmartScreen or enterprise policies may warn or block downloads; this is normal for unsigned scripts.
+
 ### Requirements
 
 - Go 1.21 or later

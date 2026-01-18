@@ -65,6 +65,57 @@ Client ──HTTP Upgrade──▶ /ws?room=ROOM&name=USER
 
 ## クイックスタート
 
+## インストール（macOS）
+
+Go不要でビルド済みバイナリをインストールできます。
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
+```
+
+バージョン指定:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash -s -- v1.2.3
+```
+
+インストール先を指定:
+
+```bash
+BIN_DIR="$HOME/bin" curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
+```
+
+アップデート: 同じコマンドを再実行すると最新リリースを取得して上書きします（既存バイナリはタイムスタンプ付きでバックアップされます）。
+
+## インストール（Windows）
+
+ワンライナー（最短）:
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 | iex
+```
+
+バージョン指定:
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1 v1.2.3
+```
+
+安全寄りの手順（保存→確認→実行）:
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
+notepad .\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+アップデート: 同じコマンドを再実行すると最新リリースを取得して上書きします（既存のexeはタイムスタンプ付きでバックアップされます）。
+
+注意:
+- 実行ポリシーでブロックされる場合は、上記の Process スコープ回避例をご利用ください。
+- SmartScreen や企業ポリシーにより警告/ブロックされる場合があります（未署名スクリプトでは一般的です）。
+
 ### 必要環境
 
 - Go 1.21以上
