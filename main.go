@@ -25,6 +25,9 @@ var allowDynamicRooms = flag.Bool("allow-dynamic-rooms", false, "allow dynamic r
 var authUser = flag.String("auth-user", "", "basic auth username for web UI (requires auth-password)")
 var authPassword = flag.String("auth-password", "", "basic auth password for web UI (requires auth-user)")
 var allowedOrigins = flag.String("allowed-origins", "", "comma-separated list of allowed origins for CORS (empty allows all)")
+var showVersion = flag.Bool("version", false, "print version and exit")
+
+var version = "dev"
 
 var upgrader websocket.Upgrader
 
@@ -197,6 +200,10 @@ func handleGetRooms(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
+	if *showVersion {
+		fmt.Println(version)
+		return
+	}
 	hub := NewHub()
 	
 	// Configure allowed origins

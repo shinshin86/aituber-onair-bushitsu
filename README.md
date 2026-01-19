@@ -86,6 +86,7 @@ BIN_DIR="$HOME/bin" curl -fsSL https://raw.githubusercontent.com/shinshin86/aitu
 ```
 
 Updates: run the same command again. It will fetch the latest release and replace the existing binary (a timestamped backup is kept).
+Verify: `bushitsu --version`
 
 ## Installation (Windows)
 
@@ -111,10 +112,40 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 Updates: run the same command again. It will fetch the latest release and replace the existing binary (a timestamped backup is kept).
+Verify: `bushitsu --version`
 
 Notes:
 - PowerShell execution policy may block scripts; use the Process-scope bypass example above if needed.
 - SmartScreen or enterprise policies may warn or block downloads; this is normal for unsigned scripts.
+
+## Uninstall
+
+### macOS
+
+```bash
+rm -f ~/.local/bin/bushitsu
+```
+
+If you set `BIN_DIR`, remove the binary from that directory instead.
+
+### Windows
+
+Remove the binary (default install location):
+
+```powershell
+Remove-Item "$env:LOCALAPPDATA\Programs\bushitsu\bushitsu.exe"
+```
+
+If you set `BIN_DIR`, remove it from that directory instead.
+
+Optional: remove the user PATH entry if you no longer need it (GUI or PowerShell):
+
+```powershell
+$binDir = "$env:LOCALAPPDATA\Programs\bushitsu"
+$userPath = [Environment]::GetEnvironmentVariable('Path','User')
+$newPath = ($userPath -split ';' | Where-Object { $_ -and $_.Trim().ToLower() -ne $binDir.ToLower() }) -join ';'
+[Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+```
 
 ### Requirements
 

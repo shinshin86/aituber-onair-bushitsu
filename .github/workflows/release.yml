@@ -44,8 +44,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
+          TAG="${GITHUB_REF_NAME}"
           CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-            go build -ldflags "-s -w" -o "dist/bushitsu${{ matrix.ext }}" .
+            go build -ldflags "-s -w -X main.version=${TAG}" -o "dist/bushitsu${{ matrix.ext }}" .
 
       - name: Package
         shell: bash

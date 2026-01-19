@@ -86,6 +86,7 @@ BIN_DIR="$HOME/bin" curl -fsSL https://raw.githubusercontent.com/shinshin86/aitu
 ```
 
 アップデート: 同じコマンドを再実行すると最新リリースを取得して上書きします（既存バイナリはタイムスタンプ付きでバックアップされます）。
+確認: `bushitsu --version`
 
 ## インストール（Windows）
 
@@ -111,10 +112,40 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 アップデート: 同じコマンドを再実行すると最新リリースを取得して上書きします（既存のexeはタイムスタンプ付きでバックアップされます）。
+確認: `bushitsu --version`
 
 注意:
 - 実行ポリシーでブロックされる場合は、上記の Process スコープ回避例をご利用ください。
 - SmartScreen や企業ポリシーにより警告/ブロックされる場合があります（未署名スクリプトでは一般的です）。
+
+## アンインストール
+
+### macOS
+
+```bash
+rm -f ~/.local/bin/bushitsu
+```
+
+`BIN_DIR` を指定している場合は、そのディレクトリ内のバイナリを削除してください。
+
+### Windows
+
+バイナリを削除（デフォルトのインストール先）:
+
+```powershell
+Remove-Item "$env:LOCALAPPDATA\Programs\bushitsu\bushitsu.exe"
+```
+
+`BIN_DIR` を指定している場合は、そのディレクトリ内のバイナリを削除してください。
+
+任意: PATH から削除（GUI か PowerShell）:
+
+```powershell
+$binDir = "$env:LOCALAPPDATA\Programs\bushitsu"
+$userPath = [Environment]::GetEnvironmentVariable('Path','User')
+$newPath = ($userPath -split ';' | Where-Object { $_ -and $_.Trim().ToLower() -ne $binDir.ToLower() }) -join ';'
+[Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+```
 
 ### 必要環境
 
