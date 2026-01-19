@@ -65,6 +65,71 @@ Client ──HTTP Upgrade──▶ /ws?room=ROOM&name=USER
 
 ## クイックスタート
 
+## インストール（macOS）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
+```
+
+インストール先を指定:
+
+```bash
+BIN_DIR="$HOME/bin" curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
+```
+
+アップデート: 同じコマンドを再実行すると最新リリースを取得して上書きします（既存バイナリはタイムスタンプ付きでバックアップされます）。
+確認: `bushitsu --version`
+
+## インストール（Windows）
+
+ワンライナー（最短）:
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 | iex
+```
+
+内容を確認してから実行する方法:
+
+```powershell
+irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
+notepad .\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+アップデート: 同じコマンドを再実行すると最新リリースを取得して上書きします（既存のexeはタイムスタンプ付きでバックアップされます）。
+確認: `bushitsu --version`
+
+## アンインストール
+
+### macOS
+
+```bash
+rm -f ~/.local/bin/bushitsu
+```
+
+`BIN_DIR` を指定している場合は、そのディレクトリ内のバイナリを削除してください。
+
+### Windows
+
+バイナリを削除（デフォルトのインストール先）:
+
+```powershell
+Remove-Item "$env:LOCALAPPDATA\Programs\bushitsu\bushitsu.exe"
+```
+
+`BIN_DIR` を指定している場合は、そのディレクトリ内のバイナリを削除してください。
+
+任意: PATH から削除（GUI か PowerShell）:
+
+```powershell
+$binDir = "$env:LOCALAPPDATA\Programs\bushitsu"
+$userPath = [Environment]::GetEnvironmentVariable('Path','User')
+$newPath = ($userPath -split ';' | Where-Object { $_ -and $_.Trim().ToLower() -ne $binDir.ToLower() }) -join ';'
+[Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+```
+
+## 手動ビルド
+
 ### 必要環境
 
 - Go 1.21以上
