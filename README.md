@@ -67,16 +67,8 @@ See [MESSAGE_SPEC.md](./MESSAGE_SPEC.md) for detailed specification.
 
 ## Installation (macOS)
 
-Install the prebuilt binary without requiring Go:
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash
-```
-
-To install a specific version:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.sh | bash -s -- v1.2.3
 ```
 
 To install to a custom directory:
@@ -96,14 +88,7 @@ One-liner (fastest):
 irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 | iex
 ```
 
-Install a specific version:
-
-```powershell
-irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
-powershell -ExecutionPolicy Bypass -File .\install.ps1 v1.2.3
-```
-
-Safer flow (download, review, then run):
+Review then run (download first):
 
 ```powershell
 irm https://raw.githubusercontent.com/shinshin86/aituber-onair-bushitsu/main/install.ps1 -OutFile install.ps1
@@ -146,6 +131,8 @@ $userPath = [Environment]::GetEnvironmentVariable('Path','User')
 $newPath = ($userPath -split ';' | Where-Object { $_ -and $_.Trim().ToLower() -ne $binDir.ToLower() }) -join ';'
 [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
 ```
+
+## Manual Build
 
 ### Requirements
 
