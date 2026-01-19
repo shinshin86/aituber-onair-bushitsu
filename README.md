@@ -99,10 +99,6 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 Updates: run the same command again. It will fetch the latest release and replace the existing binary (a timestamped backup is kept).
 Verify: `bushitsu --version`
 
-Notes:
-- PowerShell execution policy may block scripts; use the Process-scope bypass example above if needed.
-- SmartScreen or enterprise policies may warn or block downloads; this is normal for unsigned scripts.
-
 ## Uninstall
 
 ### macOS
