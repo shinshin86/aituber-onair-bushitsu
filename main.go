@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/subtle"
+	"embed"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -28,6 +29,9 @@ var allowedOrigins = flag.String("allowed-origins", "", "comma-separated list of
 var showVersion = flag.Bool("version", false, "print version and exit")
 
 var version = "dev"
+
+//go:embed index.html
+var indexHTML embed.FS
 
 var upgrader websocket.Upgrader
 
@@ -134,8 +138,17 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	if !basicAuth(*authUser, *authPassword, w, r) {
 		return
 	}
-	
-	http.ServeFile(w, r, "index.html")
+
+	data, err := indexHTML.ReadFile("index.html")
+	if err != nil {
+		http.Error(w, "Failed to load UI", http.StatusInternalServerError)
+		log.Printf("[ERROR] Failed to read embedded index.html: %v", err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if _, err := w.Write(data); err != nil {
+		log.Printf("[WARN] Failed to write response: %v", err)
+	}
 }
 
 // API response types
